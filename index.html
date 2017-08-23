@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Тестирование шаблонизатора</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: "Helvetica Neue", Arial, sans-serif;
+		}
+
+		.wrapper {
+			width: 960px;
+			margin: 1em auto;
+		}
+
+		output {
+			white-space: pre;
+			font-family: monospace;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<h2>Ввод</h2>
+		
+		<label>
+			<p>Писать код шаблона здесь</p>
+			<textarea id="template" cols="80" rows="15">&lt;h1&gt;Category: {{category}}&lt;/h1&gt;
+&lt;ol&gt;
+	{# items must be non­empty for valid markup #}
+	{% items %}
+	&lt;li&gt;{{ . }}&lt;/li&gt;
+	{% / %}
+&lt;/ol&gt;</textarea>
+		</label>
+
+		<label>
+			<p>Массив с данными</p>
+			<textarea id="data" cols="80" rows="5">{ category: "Fruits", items: ["Mango", "Banana", "Orange" ] }</textarea>
+		</label>
+		
+		<p>
+			<button id="update">Обновить вывод</button>
+		</p>
+
+		<h2>Вывод</h2>
+		<output id="output">Заполните поля и нажмите "Обновить"</output>
+	</div>
+
+	<script src="templateEngine.js"></script>
+	<script>
+		var $template = document.getElementById('template'),
+			$data = document.getElementById('data'),
+			$update = document.getElementById('update'),
+			$output = document.getElementById('output');
+
+		$update.addEventListener('click', function(e){
+			try {
+				var userData = eval( '(' + $data.value + ')' );
+				if (userData.toString() == '[object Object]') {
+					$output.textContent = render( $template.value, userData );
+				} else {
+					throw new Error('Данные указаны в неверном формате');
+				}
+			} catch (e) {
+				$output.innerHTML = 'Ошибка ' + e.name + ': ' + e.message;
+			}
+		});
+	</script>
+</body>
+</html>
