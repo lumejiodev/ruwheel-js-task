@@ -59,7 +59,7 @@ function render( template, data = {} ) {
 	
 	// рендер блоков и элементов
 	output = '';
-	(function renderBlock( block ) {
+	(function renderBlock( block, localData ) {
 		switch (block.type) {
 			case 'root':
 				block.elements.forEach( renderBlock );
@@ -73,7 +73,9 @@ function render( template, data = {} ) {
 				if (typeof dataSlice == 'string') {
 					output += dataSlice;
 				} else if (typeof dataSlice == 'object' && Object.prototype.toString.call( dataSlice ) == '[object Array]') {
-					//
+					dataSlice.forEach( item => {
+						block.elements.forEach( element => renderBlock( element, item ));
+					});
 				}
 				break;
 
@@ -83,11 +85,11 @@ function render( template, data = {} ) {
 
 			case 'element':
 				// @todo
+				output += localData;
 				break;
 
 			case 'string':
-				// @todo
-				// output += block.content;
+				output += block.content;
 				break;
 		}
 	})( blockParts );
