@@ -10,19 +10,53 @@ function render( template, data = {} ) {
 	output = output.replace( comRegexp, (match, comment) => '' );
 
 	// блоки
-	const blockRegexp = /({%\s*[A-z_][A-z0-9_]+\s*%}|{%\s*\/\s*%}|{{\s*\.\s*}})/g;
+	const blockRegexp = /({%\s*[A-z_][A-z0-9_]+\s*%}|{%\s*[\/.]\s*%}|{{\s*\.\s*}})/g;
+	const blockParts = {
+		type: 'root',
+		elements: []
+	};
+	let currentBlock = blockParts;
 	output.split( blockRegexp ).forEach( part => {
 		var match;
-		if (part.match(/{{\s*\.\s*}}/)) {
-			console.log( 'element' );
-		} else if (part.match(/{%\s*\/\s*%}/)) {
-			console.log( 'closing' );
-		} else if (match = part.match(/{%\s*([A-z_][A-z0-9_]+)\s*%}/)) {
-			console.log( 'open ' + match[1] );
-		} else {
-			console.log( part );
+		if (part.match(/{{\s*\.\s*}}/)) { // элемент блока/вложенного блока
+
+			currentBlock.elements.push({
+				type: 'element'
+			});
+
+		} else if (part.match(/{%\s*\.\s*%}/)) { // открытие вложенного блока
+			
+			currentBlock = {
+				type: 'subblock',
+				elements: [],
+				parent: currentBlock,
+			};
+			currentBlock.parent.elements.push( currentBlock );
+
+		} else if (part.match(/{%\s*\/\s*%}/)) { // закрытие блока
+
+			currentBlock = currentBlock.parent;
+
+		} else if (match = part.match(/{%\s*([A-z_][A-z0-9_]+)\s*%}/)) { // открытие блока
+			
+			currentBlock = {
+				type: 'block',
+				name: match[1],
+				elements: [],
+				parent: currentBlock,
+			};
+			currentBlock.parent.elements.push( currentBlock );
+
+		} else { // общий случай (строки)
+			
+			currentBlock.elements.push({
+				type: 'string',
+				content: part
+			});
+
 		}
 	});
+	console.log( blockParts );
 
 	return output;
 }
