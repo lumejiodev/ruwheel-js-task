@@ -9,7 +9,7 @@ function render( template, data = {} ) {
 	const comRegexp = /{#(.*)#}/g;
 	output = output.replace( comRegexp, (match, comment) => '' );
 
-	// блоки
+	// сбор данных о блоках и элементах
 	const blockRegexp = /({%\s*[A-z_][A-z0-9_]+\s*%}|{%\s*[\/.]\s*%}|{{\s*\.\s*}})/g;
 	const blockParts = {
 		type: 'root',
@@ -56,7 +56,41 @@ function render( template, data = {} ) {
 
 		}
 	});
-	console.log( blockParts );
+	
+	// рендер блоков и элементов
+	output = '';
+	(function renderBlock( block ) {
+		switch (block.type) {
+			case 'root':
+				block.elements.forEach( renderBlock );
+				break;
+
+			case 'block':
+				if (block.name in data == false || block.name === '') break;
+				
+				let dataSlice = data[ block.name ];
+
+				if (typeof dataSlice == 'string') {
+					output += dataSlice;
+				} else if (typeof dataSlice == 'object' && Object.prototype.toString.call( dataSlice ) == '[object Array]') {
+					//
+				}
+				break;
+
+			case 'subblock':
+				// @todo
+				break;
+
+			case 'element':
+				// @todo
+				break;
+
+			case 'string':
+				// @todo
+				// output += block.content;
+				break;
+		}
+	})( blockParts );
 
 	return output;
 }
