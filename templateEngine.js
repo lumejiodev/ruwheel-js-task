@@ -59,7 +59,7 @@ function render( template, data = {} ) {
 	
 	// рендер блоков и элементов
 	output = '';
-	(function renderBlock( block, localData ) {
+	(function renderBlock( block, localData = '' ) {
 		switch (block.type) {
 			case 'root':
 				block.elements.forEach( renderBlock );
@@ -72,7 +72,7 @@ function render( template, data = {} ) {
 
 				if (typeof dataSlice == 'string') {
 					output += dataSlice;
-				} else if (typeof dataSlice == 'object' && Object.prototype.toString.call( dataSlice ) == '[object Array]') {
+				} else if (isArray( dataSlice )) {
 					dataSlice.forEach( item => {
 						block.elements.forEach( element => renderBlock( element, item ));
 					});
@@ -84,15 +84,22 @@ function render( template, data = {} ) {
 				break;
 
 			case 'element':
-				// @todo
-				output += localData;
+				if (typeof localData == 'string') {
+					output += localData;
+				}
 				break;
 
 			case 'string':
-				output += block.content;
+				if (typeof block.content == 'string') {
+					output += block.content;
+				}
 				break;
 		}
 	})( blockParts );
+
+	function isArray( arr ) {
+		return typeof arr == 'object' && Object.prototype.toString.call( arr ) == '[object Array]';
+	}
 
 	return output;
 }
