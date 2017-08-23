@@ -109,5 +109,9 @@ function render( template, data = {} ) {
 		return typeof string == 'string' || typeof string == 'number';
 	}
 
+	// после обработки могут появляться некрасивые двойные переносы строк
+	// решил от них избавляться после всех обработок
+	output = output.replace(/\n\s*\n/g, match => "\n");
+
 	return output;
 }
