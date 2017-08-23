@@ -70,7 +70,7 @@ function render( template, data = {} ) {
 				
 				let dataSlice = data[ block.name ];
 
-				if (typeof dataSlice == 'string') {
+				if (isStringOrNum( dataSlice )) {
 					output += dataSlice;
 				} else if (isArray( dataSlice )) {
 					dataSlice.forEach( item => {
@@ -80,17 +80,21 @@ function render( template, data = {} ) {
 				break;
 
 			case 'subblock':
-				// @todo
+				if (isArray( localData )) {
+					localData.forEach( item => {
+						block.elements.forEach( element => renderBlock( element, item ));
+					});
+				}
 				break;
 
 			case 'element':
-				if (typeof localData == 'string') {
+				if (isStringOrNum( localData )) {
 					output += localData;
 				}
 				break;
 
 			case 'string':
-				if (typeof block.content == 'string') {
+				if (isStringOrNum( block.content )) {
 					output += block.content;
 				}
 				break;
@@ -99,6 +103,10 @@ function render( template, data = {} ) {
 
 	function isArray( arr ) {
 		return typeof arr == 'object' && Object.prototype.toString.call( arr ) == '[object Array]';
+	}
+
+	function isStringOrNum( string ) {
+		return typeof string == 'string' || typeof string == 'number';
 	}
 
 	return output;
